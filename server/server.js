@@ -5,27 +5,27 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Sample TMDB endpoint (proxy)
+// TMDB search route
 app.get('/api/search', async (req, res) => {
   const query = req.query.q;
   try {
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/search/movie`,
-      {
-        params: {
-          api_key: process.env.TMDB_API_KEY,
-          query,
-        },
-      }
-    );
-    res.json(response.data);
+    const tmdbRes = await axios.get('https://api.themoviedb.org/3/search/movie', {
+      params: {
+        api_key: process.env.TMDB_API_KEY,
+        query,
+      },
+    });
+    res.json(tmdbRes.data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch from TMDB' });
+    console.error('TMDB fetch failed:', error.message);
+    res.status(500).json({ error: 'TMDB fetch failed' });
   }
 });
 
