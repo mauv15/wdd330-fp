@@ -4,7 +4,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const resultsDiv = document.getElementById("results");
 
-  // Event listener for search button
+  // Modal elements
+  const modal = document.createElement("div");
+  modal.id = "movieModal";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const modalBody = document.getElementById("modalBody");
+  const closeBtn = modal.querySelector(".close");
+
+  closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+
+  // Search button click
   searchBtn.addEventListener("click", () => {
     const query = searchInput.value.trim();
     if (!query) {
@@ -14,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchMovies(query);
   });
 
-  // Press Enter to search
+  // Enter key to search
   searchInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       searchBtn.click();
@@ -42,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     resultsDiv.innerHTML = movies
       .map(movie => `
-        <div class="movie-card">
+        <div class="movie-card" data-id="${movie.id}">
           <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" 
                alt="${movie.title}" />
           <h3>${movie.title}</h3>
@@ -51,5 +74,32 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `)
       .join("");
+
+    document.querySelectorAll(".movie-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const movieId = card.getAttribute("data-id");
+        showMovieDetails(movieId);
+      });
+    });
+  }
+
+  async function showMovieDetails(movieId) {
+    try {
+      const res = await fetch(
+        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=videos`
+      );
+      const movie = await res.json();
+
+      modalBody.innerHTML = `
+        <h2>${movie.title}</h2>
+        <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}" alt="${movie.title}" />
+        <p><strong>Release Date:</strong> ${movie.release_date || "N/A"}</p>
+        <p><strong>Genres:</strong> ${movie.genres.map(g => g.name).join(", ")}</p>
+        <p><strong>Overview:</strong> ${movie.overview}</p>
+      `;
+      modal.style.display = "block";
+    } catch (err) {
+      console.error("Failed to fetch movie details", err);
+    }
   }
 });
