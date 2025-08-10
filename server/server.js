@@ -8,13 +8,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files from public folder
+// Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
-
-// Explicitly serve index.html for root
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
 
 // TMDB search route
 app.get('/api/search', async (req, res) => {
@@ -30,6 +25,22 @@ app.get('/api/search', async (req, res) => {
   } catch (error) {
     console.error('TMDB fetch failed:', error.message);
     res.status(500).json({ error: 'TMDB fetch failed' });
+  }
+});
+
+// TMDB movie details route
+app.get('/api/movie/:id', async (req, res) => {
+  try {
+    const tmdbRes = await axios.get(`https://api.themoviedb.org/3/movie/${req.params.id}`, {
+      params: {
+        api_key: process.env.TMDB_API_KEY,
+        append_to_response: 'videos'
+      }
+    });
+    res.json(tmdbRes.data);
+  } catch (error) {
+    console.error('TMDB movie details fetch failed:', error.message);
+    res.status(500).json({ error: 'Failed to fetch movie details' });
   }
 });
 

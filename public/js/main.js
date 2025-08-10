@@ -1,4 +1,3 @@
-// public/js/main.js
 document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
@@ -85,9 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function showMovieDetails(movieId) {
     try {
-      const res = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=videos`
-      );
+      const res = await fetch(`/api/movie/${movieId}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const movie = await res.json();
 
       modalBody.innerHTML = `
