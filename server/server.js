@@ -1,4 +1,3 @@
-// server/server.js
 const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
@@ -9,8 +8,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files
+// Serve static files from public folder
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Explicitly serve index.html for root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // TMDB search route
 app.get('/api/search', async (req, res) => {
