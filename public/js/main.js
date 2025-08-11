@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
-  const resultsDiv = document.getElementById("results");
   const genreFilter = document.getElementById("genreFilter");
+  const resultsDiv = document.getElementById("results");
 
-  // Modal
+  let currentMovies = []; // Store current search results
+
+  // Modal setup
   const modal = document.createElement("div");
   modal.id = "movieModal";
   modal.innerHTML = `
@@ -24,75 +26,48 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === modal) modal.style.display = "none";
   });
 
-  searchBtn.addEventListener("click", () => {
-    const query = searchInput.value.trim();
-    if (!query) {
-      alert("Please enter a movie name");
+  // Display movies with optional genre filtering
+  function displayMovies(movies) {
+    if (!movies?.length) {
+      resultsDiv.innerHTML = "<p>No results found.</p>";
       return;
     }
-    searchMovies(query);
-  });
-  searchInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") searchBtn.click();
-  });
 
-  async function searchMovies(query) {
-    resultsDiv.innerHTML = "<p>Searching...</p>";
-    try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-      displayMovies(data.results);
-    } catch (err) {
-      console.error("Search failed:", err);
-      resultsDiv.innerHTML = "<p>Failed to fetch movies.</p>";
+    const selectedGenreId = genreFilter.value;
+
+    // Filter by genre ID if selected
+    const filteredMovies = selectedGenreId
+      ? movies.filter(movie =>
+          movie.genre_ids?.includes(Number(selectedGenreId))
+        )
+      : movies;
+
+    if (filteredMovies.length === 0) {
+      resultsDiv.innerHTML = "<p>No results match the selected genre.</p>";
+      return;
     }
-  }
 
-  function displayMovies(movies) {
-  if (!movies?.length) {
-    resultsDiv.innerHTML = "<p>No results found.</p>";
-    return;
-  }
+    resultsDiv.innerHTML = filteredMovies
+      .map(movie => `
+        <div class="movie-card" data-id="${movie.id}">
+          <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" />
+          <h3>${movie.title}</h3>
+          <p>Release: ${movie.release_date || "N/A"}</p>
+          <p>Rating: ${movie.vote_average || "N/A"}</p>
+        </div>
+      `)
+      .join("");
 
-  const selectedGenre = genreFilter.value;
-
-  // Filter by genre if selected
-  const filteredMovies = selectedGenre
-    ? movies.filter(movie =>
-        movie.genres?.some(g => g.name === selectedGenre)
-      )
-    : movies;
-
-  if (filteredMovies.length === 0) {
-    resultsDiv.innerHTML = "<p>No results match the selected genre.</p>";
-    return;
-  }
-
-  resultsDiv.innerHTML = filteredMovies
-    .map(movie => `
-      <div class="movie-card" data-id="${movie.id}">
-        <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" />
-        <h3>${movie.title}</h3>
-        <p>Release: ${movie.release_date || "N/A"}</p>
-        <p>Rating: ${movie.vote_average || "N/A"}</p>
-      </div>
-    `)
-    .join("");
-
-  // Re-attach click handlers
-  document.querySelectorAll(".movie-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const movieId = card.dataset.id;
-      showMovieDetails(movieId);
+    // Attach click event to show modal details
+    document.querySelectorAll(".movie-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const movieId = card.dataset.id;
+        showMovieDetails(movieId);
+      });
     });
-  });
+  }
 
-  genreFilter.addEventListener("change", () => {
-    displayMovies(currentMovies);
-  });
-}
-
+  // Fetch and show movie details in modal
   async function showMovieDetails(movieId) {
     try {
       const res = await fetch(`/api/movie/${movieId}`);
@@ -111,4 +86,36 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Failed to fetch movie details:", err);
     }
   }
+
+  // Search button click handler
+  searchBtn.addEventListener("click", async () => {
+    const query = searchInput.value.trim();
+    if (!query) {
+      alert("Please enter a movie name");
+      return;
+    }
+
+    resultsDiv.innerHTML = "<p>Searching...</p>";
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+
+      currentMovies = data.results;
+      displayMovies(currentMovies);
+    } catch (err) {
+      console.error("Search failed:", err);
+      resultsDiv.innerHTML = "<p>Failed to fetch movies.</p>";
+    }
+  });
+
+  // Filter results when genre changes
+  genreFilter.addEventListener("change", () => {
+    displayMovies(currentMovies);
+  });
+
+  // Support Enter key to trigger search
+  searchInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") searchBtn.click();
+  });
 });
