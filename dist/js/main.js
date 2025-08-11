@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
   const resultsDiv = document.getElementById("results");
+  const genreFilter = document.getElementById("genreFilter");
 
   // Modal
   const modal = document.createElement("div");
@@ -49,29 +50,48 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function displayMovies(movies) {
-    if (!movies?.length) {
-      resultsDiv.innerHTML = "<p>No results found.</p>";
-      return;
-    }
-
-    resultsDiv.innerHTML = movies
-      .map(movie => `
-        <div class="movie-card" data-id="${movie.id}">
-          <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" />
-          <h3>${movie.title}</h3>
-          <p>Release: ${movie.release_date || "N/A"}</p>
-          <p>Rating: ${movie.vote_average || "N/A"}</p>
-        </div>
-      `)
-      .join("");
-
-    document.querySelectorAll(".movie-card").forEach(card => {
-      card.addEventListener("click", () => {
-        const movieId = card.dataset.id;
-        showMovieDetails(movieId);
-      });
-    });
+  if (!movies?.length) {
+    resultsDiv.innerHTML = "<p>No results found.</p>";
+    return;
   }
+
+  const selectedGenre = genreFilter.value;
+
+  // Filter by genre if selected
+  const filteredMovies = selectedGenre
+    ? movies.filter(movie =>
+        movie.genres?.some(g => g.name === selectedGenre)
+      )
+    : movies;
+
+  if (filteredMovies.length === 0) {
+    resultsDiv.innerHTML = "<p>No results match the selected genre.</p>";
+    return;
+  }
+
+  resultsDiv.innerHTML = filteredMovies
+    .map(movie => `
+      <div class="movie-card" data-id="${movie.id}">
+        <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" />
+        <h3>${movie.title}</h3>
+        <p>Release: ${movie.release_date || "N/A"}</p>
+        <p>Rating: ${movie.vote_average || "N/A"}</p>
+      </div>
+    `)
+    .join("");
+
+  // Re-attach click handlers
+  document.querySelectorAll(".movie-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const movieId = card.dataset.id;
+      showMovieDetails(movieId);
+    });
+  });
+
+  genreFilter.addEventListener("change", () => {
+    displayMovies(currentMovies);
+  });
+}
 
   async function showMovieDetails(movieId) {
     try {

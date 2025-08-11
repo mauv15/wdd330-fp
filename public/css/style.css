@@ -109,4 +109,39 @@ input, button {
   color: #000;
 }
 
+/* Style the search button */
+button#searchBtn {
+  background-color: #ff6f61;
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 0.5rem;
+}
 
+button#searchBtn:hover {
+  background-color: #ff4b3e;
+}
+
+/* Style the genre dropdown */
+select#genreFilter {
+  background-color: #222;
+  color: white;
+  border: 1px solid #555;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: border-color 0.3s ease;
+}
+
+select#genreFilter:hover,
+select#genreFilter:focus {
+  border-color: #ff6f61;
+  outline: none;
+}
