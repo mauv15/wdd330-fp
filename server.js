@@ -1,7 +1,8 @@
-const express = require('express');
-const axios = require('axios');
-const dotenv = require('dotenv');
-const path = require('path');
+import express from 'express';
+import axios from 'axios';
+import dotenv from 'dotenv';
+import path from 'path';
+
 
 dotenv.config();
 
