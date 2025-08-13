@@ -1,7 +1,6 @@
 {
   "name": "wdd330-fp",
   "version": "1.0.0",
-  "type": "module",
   "main": "server.js",
   "scripts": {
     "build": "vite build",
