@@ -15,7 +15,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       // Point to your HTML entry file
-        input: path.resolve(__dirname, 'public/index.html')
+        input: path.resolve(__dirname, 'src/index.html')
     },
     outDir: 'dist', // Where to put built files
     emptyOutDir: true
