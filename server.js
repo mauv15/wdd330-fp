@@ -13,10 +13,10 @@ app.use(express.json());
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
-// === Serve frontend build ===
+// Serve frontend build
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// === API endpoints ===
+// API routes
 app.get('/api/genres', async (req, res) => {
   try {
     const response = await fetch(
@@ -48,9 +48,8 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-// === Catch-all to serve index.html for any other route ===
-// Catch-all route for SPA (Vue/React/Vite)
-app.get('/*', (req, res) => {
+// Catch-all for SPA
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
