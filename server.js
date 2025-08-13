@@ -1,49 +1,50 @@
-const express = require('express');
-const axios = require('axios');
-const dotenv = require('dotenv');
-const path = require('path');
-
-dotenv.config();
+// server.js (ESM version)
+import express from 'express';
+import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
-// TMDB search route
+// Proxy endpoint for genres
+app.get('/api/genres', async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}`
+    );
+    if (!response.ok) {
+      throw new Error(`TMDB API error: ${response.status}`);
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch genres' });
+  }
+});
+
+// Example movies search proxy
 app.get('/api/search', async (req, res) => {
-  const query = req.query.q;
+  const query = req.query.query;
   try {
-    const tmdbRes = await axios.get('https://api.themoviedb.org/3/search/movie', {
-      params: {
-        api_key: process.env.TMDB_API_KEY,
-        query,
-      },
-    });
-    res.json(tmdbRes.data);
+    const response = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+    );
+    if (!response.ok) {
+      throw new Error(`TMDB API error: ${response.status}`);
+    }
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    console.error('TMDB fetch failed:', error.message);
-    res.status(500).json({ error: 'TMDB fetch failed' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to search movies' });
   }
 });
 
-// TMDB movie details route
-app.get('/api/movie/:id', async (req, res) => {
-  try {
-    const tmdbRes = await axios.get(`https://api.themoviedb.org/3/movie/${req.params.id}`, {
-      params: {
-        api_key: process.env.TMDB_API_KEY,
-        append_to_response: 'videos'
-      }
-    });
-    res.json(tmdbRes.data);
-  } catch (error) {
-    console.error('TMDB movie details fetch failed:', error.message);
-    res.status(500).json({ error: 'Failed to fetch movie details' });
-  }
-});
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
