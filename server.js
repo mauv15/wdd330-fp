@@ -49,7 +49,8 @@ app.get('/api/search', async (req, res) => {
 });
 
 // === Catch-all to serve index.html for any other route ===
-app.get('*', (req, res) => {
+// Catch-all route for SPA (Vue/React/Vite)
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
