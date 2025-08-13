@@ -8,7 +8,7 @@ dotenv.config(); // Load environment variables from .env
 
 const app = express();
 
-// ✅ Configure CORS to allow requests from specific origins
+// Configure CORS to allow requests from specific origins
 app.use(cors({
   origin: [
     'http://localhost:5173', // Your Vite dev server
@@ -23,7 +23,7 @@ app.use(express.json());
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 if (!TMDB_API_KEY) {
-  console.error('❌ TMDB_API_KEY is not set in environment variables');
+  console.error('TMDB_API_KEY is not set in environment variables');
   process.exit(1);
 }
 
@@ -64,5 +64,5 @@ app.get('/api/movies', async (req, res) => {
 const PORT = process.env.PORT || 5050;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
