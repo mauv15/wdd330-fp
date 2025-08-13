@@ -1,49 +1,39 @@
-const express = require('express');
-const axios = require('axios');
-const dotenv = require('dotenv');
-const path = require('path');
-
-dotenv.config();
+// server.js
+import express from 'express';
+import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
-// TMDB search route
-app.get('/api/search', async (req, res) => {
-  const query = req.query.q;
+// Proxy endpoint for genres
+app.get('/api/genres', async (req, res) => {
   try {
-    const tmdbRes = await axios.get('https://api.themoviedb.org/3/search/movie', {
-      params: {
-        api_key: process.env.TMDB_API_KEY,
-        query,
-      },
-    });
-    res.json(tmdbRes.data);
-  } catch (error) {
-    console.error('TMDB fetch failed:', error.message);
-    res.status(500).json({ error: 'TMDB fetch failed' });
+    const response = await fetch(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=en-US`
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching genres' });
   }
 });
 
-// TMDB movie details route
-app.get('/api/movie/:id', async (req, res) => {
+// Proxy endpoint for movie search by genre
+app.get('/api/movies', async (req, res) => {
+  const { genreId } = req.query;
   try {
-    const tmdbRes = await axios.get(`https://api.themoviedb.org/3/movie/${req.params.id}`, {
-      params: {
-        api_key: process.env.TMDB_API_KEY,
-        append_to_response: 'videos'
-      }
-    });
-    res.json(tmdbRes.data);
-  } catch (error) {
-    console.error('TMDB movie details fetch failed:', error.message);
-    res.status(500).json({ error: 'Failed to fetch movie details' });
+    const response = await fetch(
+      `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genreId}`
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching movies' });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(3000, () => console.log(`Server running at http://localhost:${PORT}`));

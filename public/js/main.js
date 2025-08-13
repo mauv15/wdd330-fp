@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Detect API base URL depending on environment
+  const API_BASE =
+    window.location.hostname === "localhost"
+      ? "/api" // Local dev uses Vite proxy to Express
+      : "https://api.render.com/deploy/srv-d2b2hlk9c44c7387ttvg?key=921fDjby3Xo/api"; // Replace with your Render URL
+
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
   const genreFilter = document.getElementById("genreFilter");
@@ -35,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectedGenreId = genreFilter.value;
 
-    // Filter by genre ID if selected
     const filteredMovies = selectedGenreId
       ? movies.filter(movie =>
           movie.genre_ids?.includes(Number(selectedGenreId))
@@ -58,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
       `)
       .join("");
 
-    // Attach click event to show modal details
     document.querySelectorAll(".movie-card").forEach(card => {
       card.addEventListener("click", () => {
         const movieId = card.dataset.id;
@@ -70,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fetch and show movie details in modal
   async function showMovieDetails(movieId) {
     try {
-      const res = await fetch(`/api/movie/${movieId}`);
+      const res = await fetch(`${API_BASE}/movie/${movieId}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const movie = await res.json();
 
@@ -97,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     resultsDiv.innerHTML = "<p>Searching...</p>";
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
 
