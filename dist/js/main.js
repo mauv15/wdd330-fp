@@ -1,16 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Detect API base URL depending on environment
+  // ✅ Use same-origin API calls in production to avoid CORS
   const API_BASE =
     window.location.hostname === "localhost"
-      ? "/api" // Local dev uses Vite proxy to Express
-      : "https://api.render.com/deploy/srv-d2b2hlk9c44c7387ttvg?key=921fDjby3Xo/api"; // Replace with your Render URL
+      ? "/api" // Local dev (Vite proxy → Express)
+      : "/api"; // Production (served from same domain as backend)
 
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
   const genreFilter = document.getElementById("genreFilter");
   const resultsDiv = document.getElementById("results");
 
-  let currentMovies = []; // Store current search results
+  let currentMovies = [];
 
   // Modal setup
   const modal = document.createElement("div");
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === modal) modal.style.display = "none";
   });
 
-  // Display movies with optional genre filtering
   function displayMovies(movies) {
     if (!movies?.length) {
       resultsDiv.innerHTML = "<p>No results found.</p>";
@@ -40,30 +39,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const selectedGenreId = genreFilter.value;
-
     const filteredMovies = selectedGenreId
-      ? movies.filter(movie =>
+      ? movies.filter((movie) =>
           movie.genre_ids?.includes(Number(selectedGenreId))
         )
       : movies;
 
-    if (filteredMovies.length === 0) {
+    if (!filteredMovies.length) {
       resultsDiv.innerHTML = "<p>No results match the selected genre.</p>";
       return;
     }
 
     resultsDiv.innerHTML = filteredMovies
-      .map(movie => `
+      .map(
+        (movie) => `
         <div class="movie-card" data-id="${movie.id}">
           <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" />
           <h3>${movie.title}</h3>
           <p>Release: ${movie.release_date || "N/A"}</p>
           <p>Rating: ${movie.vote_average || "N/A"}</p>
         </div>
-      `)
+      `
+      )
       .join("");
 
-    document.querySelectorAll(".movie-card").forEach(card => {
+    document.querySelectorAll(".movie-card").forEach((card) => {
       card.addEventListener("click", () => {
         const movieId = card.dataset.id;
         showMovieDetails(movieId);
@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Fetch and show movie details in modal
   async function showMovieDetails(movieId) {
     try {
       const res = await fetch(`${API_BASE}/movie/${movieId}`);
@@ -82,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <h2>${movie.title}</h2>
         <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}" alt="${movie.title}" />
         <p><strong>Release Date:</strong> ${movie.release_date || "N/A"}</p>
-        <p><strong>Genres:</strong> ${movie.genres.map(g => g.name).join(", ")}</p>
+        <p><strong>Genres:</strong> ${movie.genres.map((g) => g.name).join(", ")}</p>
         <p><strong>Overview:</strong> ${movie.overview}</p>
       `;
       modal.style.display = "block";
@@ -91,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Search button click handler
   searchBtn.addEventListener("click", async () => {
     const query = searchInput.value.trim();
     if (!query) {
@@ -101,7 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     resultsDiv.innerHTML = "<p>Searching...</p>";
     try {
-      const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(
+        `${API_BASE}/search?q=${encodeURIComponent(query)}`
+      );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
 
@@ -113,12 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Filter results when genre changes
   genreFilter.addEventListener("change", () => {
     displayMovies(currentMovies);
   });
 
-  // Support Enter key to trigger search
   searchInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") searchBtn.click();
   });

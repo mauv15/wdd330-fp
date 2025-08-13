@@ -1,23 +1,22 @@
-//vite.config.js
 import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
-  root: '.', // Make sure Vite starts from the project root
+  root: '.',
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5050', // Express backend
-        changeOrigin: true
+        target: 'http://localhost:3000', // Tu backend Express
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '') // elimina el prefijo /api
       }
     }
   },
   build: {
     rollupOptions: {
-      // Point to HTML entry file
-        input: path.resolve(__dirname, 'public/index.html')
+      input: path.resolve(__dirname, 'public/index.html')
     },
-    outDir: 'dist', // Where to put built files
+    outDir: 'dist',
     emptyOutDir: true
   }
 });

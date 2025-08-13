@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Use same-origin API calls in production to avoid CORS
+  // Use same-origin API calls in production to avoid CORS
   const API_BASE =
     window.location.hostname === "localhost"
       ? "/api" // Local dev (Vite proxy → Express)
