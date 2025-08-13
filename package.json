@@ -2,11 +2,11 @@
   "name": "wdd330-fp",
   "version": "1.0.0",
   "type": "module",
-  "main": "server/server.js",
+  "main": "server.js",
   "scripts": {
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server/server.js",
+    "start": "node server.js",
     "dev": "vite"
   },
   "keywords": [],

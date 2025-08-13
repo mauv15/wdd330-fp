@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const API_BASE =
     window.location.hostname === "localhost"
       ? "/api" // Local dev uses Vite proxy to Express
-      : "https://wdd330-fp.onrender.com/api"; // Replace with your Render URL
+      : "https://api.render.com/deploy/srv-d2b2hlk9c44c7387ttvg?key=921fDjby3Xo/api"; // Replace with your Render URL
 
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
